@@ -14,7 +14,7 @@ module.exports.deleteCard = (req, res) => {
       return res.status(200).send({ card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки.' });
       }
       return res.status(500).send({ message: err.message });
@@ -51,7 +51,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
     return res.status(200).send(card);
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       return res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка.' });
     }
     return res.status(500).send({ message: err.message });
@@ -69,7 +69,7 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
     return res.status(200).send(card);
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       return res.status(400).send({ message: 'Переданы некорректные данные для удаления лайка.' });
     }
     return res.status(500).send({ message: err.message });

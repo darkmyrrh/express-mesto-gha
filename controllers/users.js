@@ -13,7 +13,12 @@ module.exports.getUserById = (req, res) => {
       }
       return res.status(200).send({ user });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(400).send({ message: 'Передан некорректный _id пользователя.' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.createUser = (req, res) => {
@@ -31,15 +36,18 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUserById = (req, res) => {
   const { name, about } = req.body;
   return User.findByIdAndUpdate(
-    req.user,
+    req.user._id,
     { name, about },
-    { new: true },
+    {
+      new: true,
+      runValidators: true,
+    },
   )
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
       }
-      return res.status(201).send({ user });
+      return res.status(200).send({ user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -52,15 +60,18 @@ module.exports.updateUserById = (req, res) => {
 module.exports.updateUserAvatarById = (req, res) => {
   const { avatar } = req.body;
   return User.findByIdAndUpdate(
-    req.user,
+    req.user._id,
     { avatar },
-    { new: true },
+    {
+      new: true,
+      runValidators: true,
+    },
   )
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
       }
-      return res.status(201).send({ user });
+      return res.status(200).send({ user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
