@@ -2,7 +2,7 @@ const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => Card.find({})
   .then((cards) => res.status(200).send({ cards }))
-  .catch(() => res.status(500).send({ message: 'С сервером что-то не так' }));
+  .catch((err) => res.status(500).send({ message: err.message }));
 
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
@@ -17,7 +17,7 @@ module.exports.deleteCard = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки.' });
       }
-      return res.status(500).send({ message: 'С сервером что-то не так' });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -35,7 +35,7 @@ module.exports.createCard = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
       }
-      return res.status(500).send({ message: 'С сервером что-то не так' });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -54,7 +54,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
     if (err.name === 'ValidationError') {
       return res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка.' });
     }
-    return res.status(500).send({ message: 'С сервером что-то не так' });
+    return res.status(500).send({ message: err.message });
   });
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
@@ -72,5 +72,5 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
     if (err.name === 'ValidationError') {
       return res.status(400).send({ message: 'Переданы некорректные данные для удаления лайка.' });
     }
-    return res.status(500).send({ message: 'С сервером что-то не так' });
+    return res.status(500).send({ message: err.message });
   });
