@@ -13,12 +13,7 @@ module.exports.getUserById = (req, res) => {
       }
       return res.status(200).send({ user });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные пользователя.' });
-      }
-      return res.status(500).send({ message: 'С сервером что-то не так' });
-    });
+    .catch(() => res.status(500).send({ message: 'С сервером что-то не так' }));
 };
 
 module.exports.createUser = (req, res) => {
