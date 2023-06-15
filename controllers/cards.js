@@ -1,23 +1,36 @@
+const mongoose = require('mongoose');
+
 const Card = require('../models/card');
+const {
+  SUCCESS,
+  CREATED,
+  NOT_FOUND,
+  BAD_REQUEST,
+  INTERNAL_SERVER_ERROR,
+} = require('../utils/responceCodes');
 
 module.exports.getCards = (req, res) => Card.find({})
-  .then((cards) => res.status(200).send({ cards }))
-  .catch((err) => res.status(500).send({ message: err.message }));
+  .then((cards) => res.status(SUCCESS).send({ cards }))
+  .catch((err) => {
+    console.log(err.message);
+    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка сервера' });
+  });
 
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
   return Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
       }
-      return res.status(200).send({ card });
+      return res.status(SUCCESS).send({ card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки.' });
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при удалении карточки.' });
       }
-      return res.status(500).send({ message: err.message });
+      console.log(err.message);
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка сервера' });
     });
 };
 
@@ -30,12 +43,13 @@ module.exports.createCard = (req, res) => {
     likes,
     owner,
   })
-    .then((newCard) => res.status(201).send({ data: newCard }))
+    .then((newCard) => res.status(CREATED).send({ data: newCard }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
+      if (err instanceof mongoose.Error.ValidationError) {
+        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.' });
       }
-      return res.status(500).send({ message: err.message });
+      console.log(err.message);
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка сервера' });
     });
 };
 
@@ -46,15 +60,16 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      return res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+      return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
     }
-    return res.status(200).send(card);
+    return res.status(SUCCESS).send(card);
   })
   .catch((err) => {
-    if (err.name === 'ValidationError' || err.name === 'CastError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+    if (err instanceof mongoose.Error.CastError) {
+      return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
     }
-    return res.status(500).send({ message: err.message });
+    console.log(err.message);
+    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка сервера' });
   });
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
@@ -64,13 +79,14 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      return res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+      return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
     }
-    return res.status(200).send(card);
+    return res.status(SUCCESS).send(card);
   })
   .catch((err) => {
-    if (err.name === 'ValidationError' || err.name === 'CastError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные для удаления лайка.' });
+    if (err instanceof mongoose.Error.CastError) {
+      return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления лайка.' });
     }
-    return res.status(500).send({ message: err.message });
+    console.log(err.message);
+    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка сервера' });
   });
