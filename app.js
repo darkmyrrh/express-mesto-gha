@@ -3,6 +3,11 @@ const express = require('express');
 const { PORT = 3000 } = process.env;
 const mongoose = require('mongoose');
 const routes = require('./routes');
+const { createUser, login } = require('./controllers/users')
+const {
+  NOT_FOUND,
+} = require('./utils/responceCodes');
+const auth = require('./middlewares/auth');
 
 const app = express();
 app.use(express.json());
@@ -14,17 +19,16 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 }).then(() => console.log('connected to bd'))
   .catch((err) => console.log(err));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '648368130423e1f167b9f218',
-  };
+app.post('/signin', login);
+app.post('/signup', createUser);
 
-  next();
-});
+app.use(auth);
+
 app.use(routes);
 
+
 app.use('/', (req, res, next) => {
-  res.status(404).send({ message: 'Запрашиваемая страница не найдена' });
+  res.status(NOT_FOUND).send({ message: 'Запрашиваемая страница не найдена' });
   next();
 });
 

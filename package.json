@@ -19,8 +19,11 @@
   },
   "homepage": "https://github.com/darkmyrrh/express-mesto-gha#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.18.2",
-    "mongoose": "^7.2.2"
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.2.2",
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "eslint": "^8.2.0",

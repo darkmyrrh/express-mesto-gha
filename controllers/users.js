@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
@@ -7,6 +9,7 @@ const {
   CREATED,
   NOT_FOUND,
   BAD_REQUEST,
+  UNAUTHORIZED,
   INTERNAL_SERVER_ERROR,
 } = require('../utils/responceCodes');
 
@@ -36,8 +39,15 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  return User.create({ name, about, avatar })
+  const { email, password, name, about, avatar } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email,
+      password: hash,
+      name,
+      about,
+      avatar,
+    }))
     .then((newUser) => res.status(CREATED).send({ newUser }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
@@ -45,6 +55,21 @@ module.exports.createUser = (req, res) => {
       }
       console.log(err.message);
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка сервера' });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key');
+      res.send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(UNAUTHORIZED)
+        .send({ message: 'Ошибка авторизации' });
     });
 };
 
