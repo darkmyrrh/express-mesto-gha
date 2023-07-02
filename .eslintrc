@@ -6,7 +6,6 @@
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "single"],
     "semi": ["error", "always"],
-    "no-underscore-dangle": ["error", { "allow": ["_id"] }],
-    "import/no-extraneous-dependencies": ["error", {"dependencies": true}]
+    "no-underscore-dangle": ["error", { "allow": ["_id"] }]
   }
 }
