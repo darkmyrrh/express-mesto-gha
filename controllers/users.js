@@ -23,8 +23,9 @@ const findUserById = (req, res, next, userId) => User.findById(userId)
   .catch((err) => {
     if (err instanceof mongoose.Error.CastError) {
       next(new BadRequestError('Передан некорректный _id пользователя.'));
+    } else {
+      next(err);
     }
-    next(err);
   });
 
 module.exports.getUserById = (req, res, next) => {
@@ -105,8 +106,9 @@ const updateUserById = (req, res, next, userData) => User.findByIdAndUpdate(
   .catch((err) => {
     if (err instanceof mongoose.Error.ValidationError) {
       next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
+    } else {
+      next(err);
     }
-    next(err);
   });
 
 module.exports.updateUserDataById = (req, res, next) => {

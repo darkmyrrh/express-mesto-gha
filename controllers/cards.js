@@ -26,8 +26,9 @@ module.exports.deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         next(new BadRequestError('Переданы некорректные данные при удалении карточки.'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -44,14 +45,15 @@ module.exports.createCard = (req, res, next) => {
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
-module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
+const updateCardData = (req, res, next, action) => Card.findByIdAndUpdate(
   req.params.cardId,
-  { $addToSet: { likes: req.user._id } },
+  action,
   { new: true },
 )
   .then((card) => {
@@ -63,24 +65,15 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   .catch((err) => {
     if (err instanceof mongoose.Error.CastError) {
       next(new BadRequestError('Переданы некорректные данные для постановки лайка.'));
+    } else {
+      next(err);
     }
-    next(err);
   });
 
-module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
-  req.params.cardId,
-  { $pull: { likes: req.user._id } },
-  { new: true },
-)
-  .then((card) => {
-    if (!card) {
-      throw new NotFoundError('Передан несуществующий _id карточки.');
-    }
-    return res.status(SUCCESS).send(card);
-  })
-  .catch((err) => {
-    if (err instanceof mongoose.Error.CastError) {
-      next(new BadRequestError('Переданы некорректные данные для удаления лайка.'));
-    }
-    next(err);
-  });
+module.exports.likeCard = (req, res, next) => {
+  updateCardData(req, res, next, { $addToSet: { likes: req.user._id } });
+};
+
+module.exports.dislikeCard = (req, res, next) => {
+  updateCardData(req, res, next, { $pull: { likes: req.user._id } });
+};
