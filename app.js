@@ -1,4 +1,5 @@
 const express = require('express');
+const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 
 const { PORT = 3000 } = process.env;
@@ -8,11 +9,16 @@ const auth = require('./middlewares/auth');
 const routes = require('./routes');
 const { createUser, login } = require('./controllers/users');
 const NotFoundError = require('./errors/NotFoundError');
+const { URL_REGEX } = require('./utils/utils');
 
 const app = express();
+
+app.use(helmet());
+
 app.use(cookieParser());
 
 app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
@@ -21,21 +27,25 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 }).then(() => console.log('connected to bd'))
   .catch((err) => console.log(err));
 
-app.post('/signin', login);
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required(),
+      password: Joi.string().required(),
+    }),
+  }),
+  login,
+);
 app.post(
   '/signup',
   celebrate({
     body: Joi.object().keys({
-      email: Joi.string().required()
-        .messages({
-          'string.empty': 'Адрес не может быть пустым',
-          'any.required': 'Необходимо указать адрес электронной почты',
-        }),
-      password: Joi.string().required()
-        .messages({
-          'string.empty': 'Пароль не может быть пустым',
-          'any.required': 'Необходимо ввести пароль',
-        }),
+      email: Joi.string().required(),
+      password: Joi.string().required(),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().regex(URL_REGEX),
     }),
   }),
   createUser,

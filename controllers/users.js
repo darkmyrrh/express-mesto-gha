@@ -53,7 +53,15 @@ module.exports.createUser = (req, res, next) => {
       about,
       avatar,
     }))
-    .then((newUser) => res.status(CREATED).send({ newUser }))
+    .then((newUser) => {
+      res.status(CREATED).send({
+        _id: newUser._id,
+        email: newUser.email,
+        name: newUser.name,
+        about: newUser.about,
+        avatar: newUser.avatar,
+      });
+    })
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('Пользователь с таким адресом электронной почты уже зарегистрирован'));
@@ -71,7 +79,11 @@ module.exports.login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.send({ token });
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      })
+        .send({ message: 'Вход успешно выполнен' });
     })
     .catch(next);
 };

@@ -20,7 +20,7 @@ router.get('/:userId', celebrate({
 router.patch(
   '/me',
   celebrate({
-    params: Joi.object().keys({
+    body: Joi.object().keys({
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
     }),
@@ -30,7 +30,7 @@ router.patch(
 router.patch(
   '/me/avatar',
   celebrate({
-    params: Joi.object().keys({
+    body: Joi.object().keys({
       avatar: Joi.string().regex(URL_REGEX),
     }),
   }),
