@@ -24,8 +24,8 @@ router.post(
   '/',
   celebrate({
     params: Joi.object().keys({
-      name: Joi.string().min(2).max(30),
-      link: Joi.string().regex(URL_REGEX),
+      name: Joi.string().min(2).max(30).required(),
+      link: Joi.string().regex(URL_REGEX).required(),
     }),
   }),
   createCard,
