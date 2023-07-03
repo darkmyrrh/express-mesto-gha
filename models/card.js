@@ -13,6 +13,7 @@ const cardSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: validator.isURL,
+      message: 'Неправильный формат ссылки',
     },
   },
   owner: {
